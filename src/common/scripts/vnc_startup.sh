@@ -56,9 +56,6 @@ cleanup () {
 }
 trap cleanup SIGINT SIGTERM
 
-## write correct window size to chrome properties
-$STARTUPDIR/chrome-init.sh
-
 ## resolve_vnc_connection
 VNC_IP=$(hostname -i)
 
@@ -114,6 +111,7 @@ fi
 
 if [ -z "$1" ] || [[ $1 =~ -w|--wait ]]; then
     wait $PID_SUB
+    echo "$?"
 else
     # unknown option ==> call command
     echo -e "\n\n------------------ EXECUTE COMMAND ------------------"

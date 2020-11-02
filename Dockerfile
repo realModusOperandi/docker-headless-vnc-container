@@ -31,6 +31,15 @@ ENV HOME=/headless \
     VNC_VIEW_ONLY=false
 WORKDIR $HOME
 
+COPY --chown=0:0 --from=docker.io/lwestby/daytrader-twas:2020-11-02 /opt/IBM /opt/IBM
+COPY --chown=0:0 --from=docker.io/lwestby/daytrader-twas:2020-11-02 /was /was
+
+# Uses the Java in the tWAS image
+# If using another Java, update these
+
+ENV JAVA_HOME=/opt/IBM/WebSphere/AppServer/java/8.0
+ENV PATH=$JAVA_HOME/bin:$PATH
+
 ### Add all install scripts for further steps
 ADD ./src/common/install/ $INST_SCRIPTS/
 ADD ./src/ubuntu/install/ $INST_SCRIPTS/
@@ -50,9 +59,8 @@ RUN $INST_SCRIPTS/no_vnc.sh
 ### Install Docker
 RUN $INST_SCRIPTS/docker.sh
 
-### Install firefox and chrome browser
+### Install firefox
 RUN $INST_SCRIPTS/firefox.sh
-RUN $INST_SCRIPTS/chrome.sh
 
 ### Install xfce UI
 RUN $INST_SCRIPTS/xfce_ui.sh
@@ -63,7 +71,10 @@ RUN $INST_SCRIPTS/libnss_wrapper.sh
 ADD ./src/common/scripts $STARTUPDIR
 RUN $INST_SCRIPTS/set_user_permission.sh $STARTUPDIR $HOME
 
-RUN ln -s `which python2` /usr/bin/python
+# RUN ln -fs `which python2` /usr/bin/python
+RUN ln -fs `which python2` /usr/bin/python && \
+    echo "dash dash/sh boolean false" | debconf-set-selections && \
+    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 
 USER 1000
 
